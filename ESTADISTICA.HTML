@@ -299,6 +299,14 @@
   }
   .area-item:last-child { border-bottom: none; }
  
+  /* Filas ocultas (posición > 5) */
+  .area-item.hidden-row {
+    display: none;
+  }
+  .area-item.hidden-row.visible {
+    display: grid;
+  }
+ 
   .area-rank { font-size: 1.1rem; font-weight: 800; color: var(--crema3); text-align: center; }
   .area-rank.r1 { color: var(--gold); }
   .area-rank.r2 { color: var(--text3); }
@@ -319,6 +327,34 @@
   .area-bar-fill { height: 100%; background: var(--guinda); border-radius: 100px; transition: width 0.9s cubic-bezier(0.16,1,0.3,1); }
   .area-tickets { font-size: 0.8rem; font-weight: 700; color: var(--guinda); text-align: right; }
   .area-soles { font-size: 0.78rem; font-weight: 700; color: var(--gold); text-align: right; }
+ 
+  /* ── Botón Ver más / Ver menos ── */
+  .ver-mas-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px 16px;
+    background: var(--crema);
+    border: 1.5px solid var(--crema2);
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--guinda);
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .ver-mas-btn:hover {
+    background: var(--crema2);
+    border-color: var(--guinda);
+    transform: translateY(-1px);
+  }
+  .ver-mas-btn:active { transform: translateY(0); }
+  .ver-mas-btn .arrow { transition: transform 0.25s; display: inline-block; }
+  .ver-mas-btn.expanded .arrow { transform: rotate(180deg); }
  
   .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--crema); }
   .metric-row:last-child { border-bottom: none; }
@@ -507,13 +543,7 @@ async function fetchData() {
   }
 }
  
-// ── NORMALIZE ─────────────────────────────────────────────────
-// Campos reales de SharePoint (codificados OData):
-//   Promoción  → "Promoci_x00f3_n"   valores: "Si" / "No"
-//   Área       → "OData__x00c1_rea"  valores: "GENERAL", "LOG", "MKT", etc.
-//   Nombre     → "Nombrecompleto"
-//   Teléfono   → "Tel_x00e9_fono"
-//   Vendedor   → "temp" (objeto usuario SharePoint con DisplayName)
+// ── NORMALIZE ──────────────────────────────────────────────────
 function norm(b) {
   const p  = b['Promoci_x00f3_n'] || '';
   const ps = p.toString().trim().toLowerCase();
@@ -534,6 +564,23 @@ function norm(b) {
 }
  
 function pct(a,t) { return t ? Math.round(a/t*100) : 0; }
+ 
+// ── HELPER: genera las filas de vendedores con clase hidden-row para pos >= 5 ──
+function buildVendedorRows(vlist, renderRow) {
+  return vlist.map((v, i) => {
+    const hidden = i >= 5 ? ' hidden-row' : '';
+    return `<div class="area-item${hidden}">${renderRow(v, i, vlist)}</div>`;
+  }).join('');
+}
+ 
+// ── HELPER: genera el botón Ver más solo si hay más de 5 vendedores ──
+function buildVerMasBtn(id, total) {
+  if (total <= 5) return '';
+  return `
+    <button class="ver-mas-btn" id="btn-${id}" onclick="toggleVendedores('${id}', ${total})">
+      <span class="arrow">▼</span> Ver todos los vendedores (${total})
+    </button>`;
+}
  
 function renderAll() {
   const n     = all.map(norm);
@@ -560,6 +607,63 @@ function renderAll() {
     .map(([name,d]) => ({ name, tickets:d.t, pagados:d.p, ingresos:d.p*5 }))
     .sort((a,b) => b.pagados - a.pagados);
   const maxT = areas[0]?.pagados || 1;
+ 
+  // ── Construir listas de vendedores para las 3 tarjetas ──
+  const vm = {};
+  n.forEach(b => {
+    const v = b.vendedor;
+    if (!vm[v]) vm[v] = { t:0, p:0 };
+    vm[v].t++;
+    if (b.pagado) vm[v].p++;
+  });
+  const vBase = Object.entries(vm).map(([name,d]) => ({
+    name,
+    tickets:  d.t,
+    pagados:  d.p,
+    cortesia: d.t - d.p,
+    ingresos: d.p * 5
+  }));
+ 
+  const vTotal   = [...vBase].sort((a,b) => b.tickets  - a.tickets);
+  const vPagados = [...vBase].sort((a,b) => b.pagados  - a.pagados);
+  const vCortes  = [...vBase].sort((a,b) => b.cortesia - a.cortesia);
+ 
+  const maxVT = vTotal[0]?.tickets   || 1;
+  const maxVP = vPagados[0]?.pagados || 1;
+  const maxVC = vCortes[0]?.cortesia || 1;
+ 
+  // ── Render filas vendedores TOTAL ──
+  const rowsVTotal = buildVendedorRows(vTotal, (v, i) => `
+    <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+    <div class="area-info">
+      <div class="area-name">${v.name}</div>
+      <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.tickets/maxVT*100)}%"></div></div>
+    </div>
+    <div class="area-tickets">${v.tickets} 🎫</div>
+    <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${Math.round(v.tickets/n.length*100)}%</div>
+  `);
+ 
+  // ── Render filas vendedores PAGADOS ──
+  const rowsVPagados = buildVendedorRows(vPagados, (v, i) => `
+    <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+    <div class="area-info">
+      <div class="area-name">${v.name}</div>
+      <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.pagados/maxVP*100)}%;background:var(--green)"></div></div>
+    </div>
+    <div class="area-tickets" style="color:var(--green)">${v.pagados} ✅</div>
+    <div class="area-soles">S/ ${v.ingresos.toLocaleString('es-PE')}</div>
+  `);
+ 
+  // ── Render filas vendedores CORTESÍA ──
+  const rowsVCortes = buildVendedorRows(vCortes, (v, i) => `
+    <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+    <div class="area-info">
+      <div class="area-name">${v.name}</div>
+      <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.cortesia/maxVC*100)}%;background:var(--text3)"></div></div>
+    </div>
+    <div class="area-tickets" style="color:var(--text3)">${v.cortesia} 🎁</div>
+    <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${v.tickets>0?Math.round(v.cortesia/v.tickets*100):0}% del total</div>
+  `);
  
   document.getElementById('main').innerHTML = `
     <div>
@@ -641,7 +745,6 @@ function renderAll() {
       <div class="section-label">🏆 Rankings por área</div>
       <div style="display:flex;flex-direction:column;gap:14px">
  
-        <!-- RANKING 1: Total boletos -->
         <div class="card">
           <div class="card-title">🎫 Total de boletos por área <span>TODOS</span></div>
           ${[...areas].sort((a,b)=>b.tickets-a.tickets).map((a,i,arr)=>`
@@ -658,7 +761,6 @@ function renderAll() {
             </div>`).join('')}
         </div>
  
-        <!-- RANKING 2: Boletos pagados + monto -->
         <div class="card">
           <div class="card-title">✅ Boletos pagados por área <span>S/ INGRESOS</span></div>
           ${[...areas].sort((a,b)=>b.pagados-a.pagados).map((a,i,arr)=>`
@@ -675,7 +777,6 @@ function renderAll() {
             </div>`).join('')}
         </div>
  
-        <!-- RANKING 3: Boletos cortesía -->
         <div class="card">
           <div class="card-title">🎁 Boletos cortesía por área <span>PROMOCIÓN</span></div>
           ${[...areas].sort((a,b)=>(b.tickets-b.pagados)-(a.tickets-a.pagados)).map((a,i,arr)=>{
@@ -699,70 +800,28 @@ function renderAll() {
     </div>
  
     <div>
-      <div class="section-label">🥇 Rankings de vendedores — Top 5</div>
+      <div class="section-label">🥇 Rankings de vendedores</div>
       <div style="display:flex;flex-direction:column;gap:14px">
  
         <!-- VENDEDORES: Total boletos -->
         <div class="card">
-          <div class="card-title">🎫 Más boletos totales <span>TOP 5</span></div>
-          ${(()=>{
-            const vm={};
-            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
-            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,cortesia:d.t-d.p})).sort((a,b)=>b.tickets-a.tickets).slice(0,5);
-            const max=vlist[0]?.tickets||1;
-            return vlist.map((v,i)=>`
-              <div class="area-item">
-                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
-                <div class="area-info">
-                  <div class="area-name">${v.name}</div>
-                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.tickets/max*100)}%"></div></div>
-                </div>
-                <div class="area-tickets">${v.tickets} 🎫</div>
-                <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${Math.round(v.tickets/n.length*100)}%</div>
-              </div>`).join('');
-          })()}
+          <div class="card-title">🎫 Más boletos totales <span>TODOS LOS VENDEDORES</span></div>
+          <div id="rows-v-total">${rowsVTotal}</div>
+          ${buildVerMasBtn('v-total', vTotal.length)}
         </div>
  
-        <!-- VENDEDORES: Solo pagados + monto -->
+        <!-- VENDEDORES: Solo pagados -->
         <div class="card">
-          <div class="card-title">✅ Más boletos pagados <span>TOP 5 · S/ INGRESOS</span></div>
-          ${(()=>{
-            const vm={};
-            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
-            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,ingresos:d.p*5})).sort((a,b)=>b.pagados-a.pagados).slice(0,5);
-            const max=vlist[0]?.pagados||1;
-            return vlist.map((v,i)=>`
-              <div class="area-item">
-                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
-                <div class="area-info">
-                  <div class="area-name">${v.name}</div>
-                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.pagados/max*100)}%;background:var(--green)"></div></div>
-                </div>
-                <div class="area-tickets" style="color:var(--green)">${v.pagados} ✅</div>
-                <div class="area-soles">S/ ${v.ingresos.toLocaleString('es-PE')}</div>
-              </div>`).join('');
-          })()}
+          <div class="card-title">✅ Más boletos pagados <span>TODOS LOS VENDEDORES · S/ INGRESOS</span></div>
+          <div id="rows-v-pagados">${rowsVPagados}</div>
+          ${buildVerMasBtn('v-pagados', vPagados.length)}
         </div>
  
         <!-- VENDEDORES: Solo cortesía -->
         <div class="card">
-          <div class="card-title">🎁 Más boletos cortesía <span>TOP 5 · PROMOCIÓN</span></div>
-          ${(()=>{
-            const vm={};
-            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
-            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,cortesia:d.t-d.p})).sort((a,b)=>b.cortesia-a.cortesia).slice(0,5);
-            const max=vlist[0]?.cortesia||1;
-            return vlist.map((v,i)=>`
-              <div class="area-item">
-                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
-                <div class="area-info">
-                  <div class="area-name">${v.name}</div>
-                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.cortesia/max*100)}%;background:var(--text3)"></div></div>
-                </div>
-                <div class="area-tickets" style="color:var(--text3)">${v.cortesia} 🎁</div>
-                <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${v.tickets>0?Math.round(v.cortesia/v.tickets*100):0}% del total</div>
-              </div>`).join('');
-          })()}
+          <div class="card-title">🎁 Más boletos cortesía <span>TODOS LOS VENDEDORES · PROMOCIÓN</span></div>
+          <div id="rows-v-cortes">${rowsVCortes}</div>
+          ${buildVerMasBtn('v-cortes', vCortes.length)}
         </div>
  
       </div>
@@ -821,6 +880,28 @@ function renderAll() {
   filtered = [...n];
   applyF();
   buildCharts(pagados.length, gratis.length, areas);
+}
+ 
+// ── TOGGLE VER MÁS / VER MENOS ──────────────────────────────
+function toggleVendedores(id, totalVendedores) {
+  const container = document.getElementById('rows-' + id);
+  if (!container) return;
+ 
+  const hiddenRows = container.querySelectorAll('.hidden-row');
+  const btn = document.getElementById('btn-' + id);
+  const isExpanded = btn.classList.contains('expanded');
+ 
+  if (isExpanded) {
+    // Colapsar: ocultar filas extra
+    hiddenRows.forEach(el => el.classList.remove('visible'));
+    btn.classList.remove('expanded');
+    btn.innerHTML = `<span class="arrow">▼</span> Ver todos los vendedores (${totalVendedores})`;
+  } else {
+    // Expandir: mostrar todas las filas
+    hiddenRows.forEach(el => el.classList.add('visible'));
+    btn.classList.add('expanded');
+    btn.innerHTML = `<span class="arrow">▼</span> Ver menos`;
+  }
 }
  
 function applyF() {
@@ -916,3 +997,4 @@ function setStatus(type, msg) {
 </script>
 </body>
 </html>
+ 
