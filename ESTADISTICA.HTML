@@ -513,21 +513,22 @@ async function fetchData() {
 //   Área       → "OData__x00c1_rea"  valores: "GENERAL", "LOG", "MKT", etc.
 //   Nombre     → "Nombrecompleto"
 //   Teléfono   → "Tel_x00e9_fono"
+//   Vendedor   → "temp" (objeto usuario SharePoint con DisplayName)
 function norm(b) {
   const p  = b['Promoci_x00f3_n'] || '';
   const ps = p.toString().trim().toLowerCase();
-  // "Si" (sin tilde) = CORTESÍA → pagado = false
   const pagado = !(ps === 'si' || ps === 'sí' || ps === 'yes' || ps === '1' || ps === 'true');
- 
   const area = (b['OData__x00c1_rea'] || 'Sin área').toString().trim().toUpperCase();
+  const vendedor = (b['temp']?.DisplayName || b['Vendedor'] || b['vendedor'] || 'Sin vendedor').toString().trim();
  
   return {
-    id:     b.ID || b.Title || '',
-    nombre: b['Nombrecompleto'] || b['Nombre completo'] || b.NombreCompleto || '',
-    dni:    b.DNI || b.dni || '',
-    tel:    b['Tel_x00e9_fono'] || b.Teléfono || b.Telefono || '',
+    id:       b.ID || b.Title || '',
+    nombre:   b['Nombrecompleto'] || b['Nombre completo'] || b.NombreCompleto || '',
+    dni:      b.DNI || b.dni || '',
+    tel:      b['Tel_x00e9_fono'] || b.Teléfono || b.Telefono || '',
     area,
-    promo:  pagado ? 'No' : 'Sí',
+    vendedor,
+    promo:    pagado ? 'No' : 'Sí',
     pagado,
   };
 }
@@ -692,6 +693,76 @@ function renderAll() {
               <div class="area-tickets" style="color:var(--text3)">${cortesia} 🎁</div>
               <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${pct(cortesia,a.tickets)}% del área</div>
             </div>`;}).join('')}
+        </div>
+ 
+      </div>
+    </div>
+ 
+    <div>
+      <div class="section-label">🥇 Rankings de vendedores — Top 5</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+ 
+        <!-- VENDEDORES: Total boletos -->
+        <div class="card">
+          <div class="card-title">🎫 Más boletos totales <span>TOP 5</span></div>
+          ${(()=>{
+            const vm={};
+            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
+            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,cortesia:d.t-d.p})).sort((a,b)=>b.tickets-a.tickets).slice(0,5);
+            const max=vlist[0]?.tickets||1;
+            return vlist.map((v,i)=>`
+              <div class="area-item">
+                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+                <div class="area-info">
+                  <div class="area-name">${v.name}</div>
+                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.tickets/max*100)}%"></div></div>
+                </div>
+                <div class="area-tickets">${v.tickets} 🎫</div>
+                <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${Math.round(v.tickets/n.length*100)}%</div>
+              </div>`).join('');
+          })()}
+        </div>
+ 
+        <!-- VENDEDORES: Solo pagados + monto -->
+        <div class="card">
+          <div class="card-title">✅ Más boletos pagados <span>TOP 5 · S/ INGRESOS</span></div>
+          ${(()=>{
+            const vm={};
+            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
+            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,ingresos:d.p*5})).sort((a,b)=>b.pagados-a.pagados).slice(0,5);
+            const max=vlist[0]?.pagados||1;
+            return vlist.map((v,i)=>`
+              <div class="area-item">
+                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+                <div class="area-info">
+                  <div class="area-name">${v.name}</div>
+                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.pagados/max*100)}%;background:var(--green)"></div></div>
+                </div>
+                <div class="area-tickets" style="color:var(--green)">${v.pagados} ✅</div>
+                <div class="area-soles">S/ ${v.ingresos.toLocaleString('es-PE')}</div>
+              </div>`).join('');
+          })()}
+        </div>
+ 
+        <!-- VENDEDORES: Solo cortesía -->
+        <div class="card">
+          <div class="card-title">🎁 Más boletos cortesía <span>TOP 5 · PROMOCIÓN</span></div>
+          ${(()=>{
+            const vm={};
+            n.forEach(b=>{ const v=b.vendedor; if(!vm[v])vm[v]={t:0,p:0}; vm[v].t++; if(b.pagado)vm[v].p++; });
+            const vlist=Object.entries(vm).map(([name,d])=>({name,tickets:d.t,pagados:d.p,cortesia:d.t-d.p})).sort((a,b)=>b.cortesia-a.cortesia).slice(0,5);
+            const max=vlist[0]?.cortesia||1;
+            return vlist.map((v,i)=>`
+              <div class="area-item">
+                <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+                <div class="area-info">
+                  <div class="area-name">${v.name}</div>
+                  <div class="area-bar-bg"><div class="area-bar-fill" style="width:${Math.round(v.cortesia/max*100)}%;background:var(--text3)"></div></div>
+                </div>
+                <div class="area-tickets" style="color:var(--text3)">${v.cortesia} 🎁</div>
+                <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${v.tickets>0?Math.round(v.cortesia/v.tickets*100):0}% del total</div>
+              </div>`).join('');
+          })()}
         </div>
  
       </div>
