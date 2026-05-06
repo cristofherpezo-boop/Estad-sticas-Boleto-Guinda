@@ -28,9 +28,9 @@
     --shadow:     0 2px 16px rgba(122,20,32,0.08);
     --shadow-lg:  0 8px 40px rgba(122,20,32,0.13);
   }
-
+ 
   * { margin:0; padding:0; box-sizing:border-box; }
-
+ 
   body {
     background: var(--crema);
     color: var(--text);
@@ -38,8 +38,7 @@
     font-size: 15px;
     min-height: 100vh;
   }
-
-  /* ── HEADER ── */
+ 
   header {
     background: var(--guinda);
     border-radius: 0 0 24px 24px;
@@ -50,7 +49,7 @@
     z-index: 100;
     box-shadow: var(--shadow-lg);
   }
-
+ 
   .header-eyebrow {
     font-size: 0.62rem;
     font-weight: 600;
@@ -59,7 +58,7 @@
     color: rgba(255,255,255,0.5);
     margin-bottom: 6px;
   }
-
+ 
   .header-title {
     font-size: 1.5rem;
     font-weight: 800;
@@ -69,7 +68,7 @@
     align-items: center;
     gap: 10px;
   }
-
+ 
   .header-bottom {
     display: flex;
     align-items: center;
@@ -78,13 +77,13 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-
+ 
   #last-update {
     font-size: 0.72rem;
     color: rgba(255,255,255,0.5);
     font-weight: 400;
   }
-
+ 
   .btn-refresh {
     background: #fff;
     color: var(--guinda);
@@ -101,11 +100,11 @@
     gap: 6px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   }
-
+ 
   .btn-refresh:hover { background: var(--crema); transform: translateY(-1px); }
   .btn-refresh:active { transform: translateY(0); }
   .btn-refresh.loading { opacity: 0.7; pointer-events: none; }
-
+ 
   .spinner {
     width: 14px; height: 14px;
     border: 2px solid var(--crema2);
@@ -114,13 +113,12 @@
     display: none;
     animation: spin 0.7s linear infinite;
   }
-
+ 
   .btn-refresh.loading .spinner { display: block; }
   .btn-refresh.loading .btn-icon { display: none; }
-
+ 
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── STATUS PILL ── */
+ 
   #status-pill {
     margin: 14px 16px 0;
     padding: 8px 16px;
@@ -135,7 +133,7 @@
     box-shadow: var(--shadow);
     width: fit-content;
   }
-
+ 
   .sdot {
     width: 7px; height: 7px;
     border-radius: 50%;
@@ -146,10 +144,9 @@
   .sdot.ok    { background: var(--green); box-shadow: 0 0 0 3px var(--green-lt); }
   .sdot.error { background: #e05555; box-shadow: 0 0 0 3px #fde8e8; }
   .sdot.load  { background: var(--gold); box-shadow: 0 0 0 3px #fdf3e3; animation: pulse 1s infinite; }
-
+ 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* ── MAIN ── */
+ 
   main {
     padding: 20px 16px 48px;
     display: flex;
@@ -158,8 +155,7 @@
     max-width: 900px;
     margin: 0 auto;
   }
-
-  /* ── SECTION LABEL ── */
+ 
   .section-label {
     font-size: 0.68rem;
     font-weight: 700;
@@ -169,14 +165,13 @@
     margin-bottom: 10px;
     padding-left: 2px;
   }
-
-  /* ── KPI GRID ── */
+ 
   .kpi-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-
+ 
   .kpi-card {
     background: var(--white);
     border-radius: var(--radius);
@@ -186,9 +181,9 @@
     overflow: hidden;
     transition: transform 0.18s, box-shadow 0.18s;
   }
-
+ 
   .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-
+ 
   .kpi-card.featured {
     grid-column: span 2;
     background: var(--guinda);
@@ -198,13 +193,9 @@
     justify-content: space-between;
     padding: 22px 24px;
   }
-
-  .kpi-icon {
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-    display: block;
-  }
-
+ 
+  .kpi-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+ 
   .kpi-label {
     font-size: 0.68rem;
     font-weight: 600;
@@ -213,30 +204,24 @@
     color: var(--text2);
     margin-bottom: 4px;
   }
-
+ 
   .kpi-card.featured .kpi-label { color: rgba(255,255,255,0.65); }
-
+ 
   .kpi-value {
     font-size: 2.2rem;
     font-weight: 800;
     line-height: 1;
     color: var(--text);
   }
-
+ 
   .kpi-value.guinda  { color: var(--guinda); }
   .kpi-value.green   { color: var(--green); }
   .kpi-value.gold    { color: var(--gold); }
   .kpi-value.white   { color: #fff; }
-
-  .kpi-sub {
-    font-size: 0.72rem;
-    color: var(--text3);
-    margin-top: 4px;
-    font-weight: 500;
-  }
-
+ 
+  .kpi-sub { font-size: 0.72rem; color: var(--text3); margin-top: 4px; font-weight: 500; }
   .kpi-card.featured .kpi-sub { color: rgba(255,255,255,0.55); }
-
+ 
   .kpi-badge {
     background: rgba(255,255,255,0.15);
     border-radius: 100px;
@@ -245,15 +230,14 @@
     font-weight: 700;
     color: #fff;
   }
-
-  /* ── CARDS ── */
+ 
   .card {
     background: var(--white);
     border-radius: var(--radius);
     padding: 20px;
     box-shadow: var(--shadow);
   }
-
+ 
   .card-title {
     font-size: 0.9rem;
     font-weight: 700;
@@ -263,33 +247,17 @@
     align-items: center;
     justify-content: space-between;
   }
-
-  .card-title span {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--text3);
-    letter-spacing: 0.06em;
-  }
-
+ 
+  .card-title span { font-size: 0.68rem; font-weight: 600; color: var(--text3); letter-spacing: 0.06em; }
+ 
   .chart-wrap { position: relative; height: 220px; }
-
-  /* ── PROMO SPLIT ── */
-  .promo-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .promo-half {
-    border-radius: var(--radius-sm);
-    padding: 16px;
-    text-align: center;
-  }
-
+ 
+  .promo-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+ 
+  .promo-half { border-radius: var(--radius-sm); padding: 16px; text-align: center; }
   .promo-half.pagado { background: var(--green-lt); }
   .promo-half.gratis { background: var(--crema); }
-
+ 
   .promo-half-label {
     font-size: 0.62rem;
     font-weight: 700;
@@ -298,32 +266,20 @@
     color: var(--text2);
     margin-bottom: 6px;
   }
-
-  .promo-half-val {
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-
+ 
+  .promo-half-val { font-size: 2rem; font-weight: 800; line-height: 1; }
   .promo-half.pagado .promo-half-val { color: var(--green); }
   .promo-half.gratis .promo-half-val { color: var(--text3); }
-
   .promo-half-sub { font-size: 0.7rem; color: var(--text2); margin-top: 4px; }
-
-  .ratio-bar-bg {
-    height: 8px;
-    background: var(--crema2);
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
+ 
+  .ratio-bar-bg { height: 8px; background: var(--crema2); border-radius: 100px; overflow: hidden; }
   .ratio-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--guinda), var(--gold));
     border-radius: 100px;
     transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
   }
-
+ 
   .ratio-labels {
     display: flex;
     justify-content: space-between;
@@ -332,8 +288,7 @@
     font-weight: 600;
     color: var(--text2);
   }
-
-  /* ── AREAS LIST ── */
+ 
   .area-item {
     display: grid;
     grid-template-columns: 28px 1fr 56px 72px;
@@ -342,22 +297,15 @@
     padding: 12px 0;
     border-bottom: 1px solid var(--crema);
   }
-
   .area-item:last-child { border-bottom: none; }
-
-  .area-rank {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--crema3);
-    text-align: center;
-  }
-
+ 
+  .area-rank { font-size: 1.1rem; font-weight: 800; color: var(--crema3); text-align: center; }
   .area-rank.r1 { color: var(--gold); }
   .area-rank.r2 { color: var(--text3); }
   .area-rank.r3 { color: #c4956a; }
-
+ 
   .area-info { min-width: 0; }
-
+ 
   .area-name {
     font-size: 0.82rem;
     font-weight: 700;
@@ -366,67 +314,19 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .area-bar-bg {
-    height: 4px;
-    background: var(--crema2);
-    border-radius: 100px;
-    overflow: hidden;
-    margin-top: 5px;
-  }
-
-  .area-bar-fill {
-    height: 100%;
-    background: var(--guinda);
-    border-radius: 100px;
-    transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  .area-tickets {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--guinda);
-    text-align: right;
-  }
-
-  .area-soles {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--gold);
-    text-align: right;
-  }
-
-  /* ── METRICS ── */
-  .metric-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--crema);
-  }
-
+ 
+  .area-bar-bg { height: 4px; background: var(--crema2); border-radius: 100px; overflow: hidden; margin-top: 5px; }
+  .area-bar-fill { height: 100%; background: var(--guinda); border-radius: 100px; transition: width 0.9s cubic-bezier(0.16,1,0.3,1); }
+  .area-tickets { font-size: 0.8rem; font-weight: 700; color: var(--guinda); text-align: right; }
+  .area-soles { font-size: 0.78rem; font-weight: 700; color: var(--gold); text-align: right; }
+ 
+  .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--crema); }
   .metric-row:last-child { border-bottom: none; }
-
-  .metric-lbl {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text2);
-  }
-
-  .metric-val {
-    font-size: 0.88rem;
-    font-weight: 800;
-    color: var(--text);
-  }
-
-  /* ── TICKETS TABLE ── */
-  .ticket-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-
+  .metric-lbl { font-size: 0.75rem; font-weight: 500; color: var(--text2); }
+  .metric-val { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+ 
+  .ticket-controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+ 
   .search-box {
     flex: 1;
     min-width: 160px;
@@ -440,10 +340,9 @@
     outline: none;
     transition: border-color 0.2s;
   }
-
   .search-box:focus { border-color: var(--guinda); }
   .search-box::placeholder { color: var(--text3); }
-
+ 
   .filter-pill {
     background: var(--crema);
     border: 1.5px solid var(--crema2);
@@ -457,16 +356,12 @@
     cursor: pointer;
     transition: border-color 0.2s;
   }
-
   .filter-pill:focus { border-color: var(--guinda); }
-
-  /* Table scroll wrapper */
+ 
   .table-scroll { overflow-x: auto; border-radius: var(--radius-sm); }
-
+ 
   table.tickets { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-
   table.tickets thead tr { background: var(--guinda); }
-
   table.tickets th {
     padding: 11px 14px;
     text-align: left;
@@ -479,28 +374,13 @@
     cursor: pointer;
     user-select: none;
   }
-
   table.tickets th:hover { background: var(--guinda-lt); }
-
-  table.tickets tbody tr {
-    border-bottom: 1px solid var(--crema);
-    transition: background 0.12s;
-  }
-
+  table.tickets tbody tr { border-bottom: 1px solid var(--crema); transition: background 0.12s; }
   table.tickets tbody tr:hover { background: var(--crema); }
-
-  table.tickets td {
-    padding: 10px 14px;
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  .tid {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--guinda);
-  }
-
+  table.tickets td { padding: 10px 14px; color: var(--text); white-space: nowrap; }
+ 
+  .tid { font-size: 1rem; font-weight: 800; color: var(--guinda); }
+ 
   .badge {
     display: inline-flex;
     align-items: center;
@@ -512,36 +392,17 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-
   .badge.pagado { background: var(--green-lt); color: var(--green); }
   .badge.gratis  { background: var(--crema2); color: var(--text2); }
-
-  .soles-cell {
-    font-weight: 800;
-    font-size: 0.88rem;
-  }
-
+ 
+  .soles-cell { font-weight: 800; font-size: 0.88rem; }
   .soles-cell.p { color: var(--green); }
   .soles-cell.g { color: var(--text3); }
-
-  /* Pagination */
-  .pag {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 14px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .pag-info {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text2);
-  }
-
+ 
+  .pag { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+  .pag-info { font-size: 0.72rem; font-weight: 600; color: var(--text2); }
   .pag-btns { display: flex; gap: 8px; }
-
+ 
   .pag-btn {
     background: var(--white);
     border: 1.5px solid var(--crema2);
@@ -554,26 +415,13 @@
     cursor: pointer;
     transition: all 0.15s;
   }
-
-  .pag-btn:hover:not(:disabled) {
-    background: var(--guinda);
-    color: #fff;
-    border-color: var(--guinda);
-  }
-
+  .pag-btn:hover:not(:disabled) { background: var(--guinda); color: #fff; border-color: var(--guinda); }
   .pag-btn:disabled { opacity: 0.35; cursor: default; }
-
-  /* ── EMPTY ── */
-  .empty {
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--text2);
-  }
-
+ 
+  .empty { padding: 60px 20px; text-align: center; color: var(--text2); }
   .empty-emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
   .empty p { font-size: 0.9rem; line-height: 1.6; }
-
-  /* ── FOOTER ── */
+ 
   footer {
     text-align: center;
     padding: 28px 20px;
@@ -583,10 +431,8 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
-
   footer strong { color: var(--guinda); }
-
-  /* ── RESPONSIVE ── */
+ 
   @media (min-width: 600px) {
     header { margin: 0 24px; padding: 28px 28px 32px; }
     main { padding: 24px 24px 60px; }
@@ -594,7 +440,7 @@
     .kpi-grid { grid-template-columns: repeat(4, 1fr); }
     .kpi-card.featured { grid-column: span 4; }
   }
-
+ 
   @media (min-width: 900px) {
     header { margin: 0 32px; }
     main { padding: 28px 32px 60px; }
@@ -603,8 +449,7 @@
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
+ 
 <header>
   <div class="header-eyebrow">El Sentimiento Guinda</div>
   <div class="header-title">🎫 Dashboard de Boletos</div>
@@ -617,42 +462,38 @@
     </button>
   </div>
 </header>
-
-<!-- STATUS -->
+ 
 <div id="status-pill">
   <span class="sdot" id="sdot"></span>
   <span id="stext">Presiona Actualizar para cargar los datos</span>
 </div>
-
-<!-- MAIN -->
+ 
 <main id="main">
   <div class="empty">
     <span class="empty-emoji">🎫</span>
     <p>Presiona <strong style="color:var(--guinda)">Actualizar</strong> para<br>consultar los boletos desde SharePoint.</p>
   </div>
 </main>
-
+ 
 <footer><strong>El Sentimiento Guinda</strong> · Pasión · Tradición · Emoción</footer>
-
+ 
 <script>
 const ENDPOINT = 'https://defaultef18f8a5d24a41338b5529106fa5b7.72.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1aa7d23144974106a6d64600157bd094/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J3v1-UKvs43f7CdQHxdb-AofKHlyxD6J0zOSYS6mPas';
-
+ 
 let all = [], filtered = [], page = 1, sortCol = null, sortDir = 1;
 const PER_PAGE = 15;
 let cPromo = null, cAreas = null;
-
-// ── FETCH ──────────────────────────────────────────────────────
+ 
 async function fetchData() {
   const btn = document.getElementById('btn-refresh');
   btn.classList.add('loading');
   setStatus('load', 'Conectando con SharePoint...');
-
+ 
   try {
     const res = await fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
     if (!res.ok) throw new Error('Error HTTP ' + res.status);
     const data = await res.json();
     all = Array.isArray(data) ? data : (data.boletos || data.value || []);
-    filtered = all.map(norm);
     page = 1;
     renderAll();
     setStatus('ok', all.length + ' boletos cargados correctamente');
@@ -665,40 +506,49 @@ async function fetchData() {
     btn.classList.remove('loading');
   }
 }
-
+ 
 // ── NORMALIZE ─────────────────────────────────────────────────
+// Campos reales de SharePoint (codificados OData):
+//   Promoción  → "Promoci_x00f3_n"   valores: "Si" / "No"
+//   Área       → "OData__x00c1_rea"  valores: "GENERAL", "LOG", "MKT", etc.
+//   Nombre     → "Nombrecompleto"
+//   Teléfono   → "Tel_x00e9_fono"
 function norm(b) {
-  const p = b.Promocion || b.Promoción || b.promocion || b.promoción || '';
+  const p  = b['Promoci_x00f3_n'] || '';
   const ps = p.toString().trim().toLowerCase();
-  const pagado = !(ps==='sí'||ps==='si'||ps==='yes'||ps==='1'||ps==='true');
+  // "Si" (sin tilde) = CORTESÍA → pagado = false
+  const pagado = !(ps === 'si' || ps === 'sí' || ps === 'yes' || ps === '1' || ps === 'true');
+ 
+  const area = (b['OData__x00c1_rea'] || 'Sin área').toString().trim().toUpperCase();
+ 
   return {
-    id:     b.ID_Ticket || b.Id_Ticket || b.PedidoID || b.Title || '',
-    nombre: b['Nombre completo'] || b.NombreCompleto || b.Nombre || b.nombre || '',
+    id:     b.ID || b.Title || '',
+    nombre: b['Nombrecompleto'] || b['Nombre completo'] || b.NombreCompleto || '',
     dni:    b.DNI || b.dni || '',
-    tel:    b.Teléfono || b.Telefono || b.telefono || '',
-    area:   (b.Area || b.Área || b.area || 'Sin área').toString().trim().toUpperCase(),
+    tel:    b['Tel_x00e9_fono'] || b.Teléfono || b.Telefono || '',
+    area,
     promo:  pagado ? 'No' : 'Sí',
     pagado,
   };
 }
-
+ 
 function pct(a,t) { return t ? Math.round(a/t*100) : 0; }
-
-// ── RENDER ALL ─────────────────────────────────────────────────
+ 
 function renderAll() {
-  const n = all.map(norm);
-  const total   = n.length;
+  const n     = all.map(norm);
+  const total = n.length;
+ 
   if (!total) {
     document.getElementById('main').innerHTML =
       '<div class="empty"><span class="empty-emoji">📭</span><p>No hay boletos en la lista.</p></div>';
     return;
   }
-
-  const pagados = n.filter(b => b.pagado);
-  const gratis  = n.filter(b => !b.pagado);
+ 
+  const pagados  = n.filter(b => b.pagado);
+  const gratis   = n.filter(b => !b.pagado);
   const ingresos = pagados.length * 5;
-
-  // Areas
+ 
+  // Agrupar por área
   const am = {};
   n.forEach(b => {
     if (!am[b.area]) am[b.area] = { t:0, p:0 };
@@ -709,10 +559,8 @@ function renderAll() {
     .map(([name,d]) => ({ name, tickets:d.t, pagados:d.p, ingresos:d.p*5 }))
     .sort((a,b) => b.tickets - a.tickets);
   const maxT = areas[0]?.tickets || 1;
-
+ 
   document.getElementById('main').innerHTML = `
-
-    <!-- KPIs -->
     <div>
       <div class="section-label">📊 Resumen general</div>
       <div class="kpi-grid">
@@ -724,28 +572,24 @@ function renderAll() {
           </div>
           <div class="kpi-badge">${pct(pagados.length,total)}% pagado</div>
         </div>
-
         <div class="kpi-card">
           <span class="kpi-icon">🎫</span>
           <div class="kpi-label">Total Boletos</div>
           <div class="kpi-value guinda">${total.toLocaleString()}</div>
           <div class="kpi-sub">en la lista</div>
         </div>
-
         <div class="kpi-card">
           <span class="kpi-icon">✅</span>
           <div class="kpi-label">Pagados</div>
           <div class="kpi-value green">${pagados.length.toLocaleString()}</div>
-          <div class="kpi-sub">Promo = No</div>
+          <div class="kpi-sub">Promoción = No</div>
         </div>
-
         <div class="kpi-card">
           <span class="kpi-icon">🎁</span>
           <div class="kpi-label">Cortesía</div>
           <div class="kpi-value" style="color:var(--text3)">${gratis.length.toLocaleString()}</div>
-          <div class="kpi-sub">Promo = Sí</div>
+          <div class="kpi-sub">Promoción = Si</div>
         </div>
-
         <div class="kpi-card">
           <span class="kpi-icon">🏷️</span>
           <div class="kpi-label">Áreas activas</div>
@@ -754,8 +598,7 @@ function renderAll() {
         </div>
       </div>
     </div>
-
-    <!-- Balance pagados vs cortesía -->
+ 
     <div>
       <div class="section-label">⚖️ Balance de boletos</div>
       <div class="card">
@@ -781,8 +624,7 @@ function renderAll() {
         </div>
       </div>
     </div>
-
-    <!-- Charts row -->
+ 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="charts-row">
       <div class="card">
         <div class="card-title">Distribución <span>DONUT</span></div>
@@ -793,12 +635,11 @@ function renderAll() {
         <div class="chart-wrap"><canvas id="cAreas"></canvas></div>
       </div>
     </div>
-
-    <!-- Areas ranking -->
+ 
     <div>
       <div class="section-label">🏆 Ranking por área</div>
       <div class="card">
-        <div class="card-title">Áreas con más boletos vendidos <span>${areas.length} ÁREAS</span></div>
+        <div class="card-title">Áreas con más boletos <span>${areas.length} ÁREAS</span></div>
         ${areas.map((a,i) => `
           <div class="area-item">
             <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
@@ -813,8 +654,7 @@ function renderAll() {
           </div>`).join('')}
       </div>
     </div>
-
-    <!-- Métricas -->
+ 
     <div>
       <div class="section-label">📈 Métricas clave</div>
       <div class="card">
@@ -825,8 +665,7 @@ function renderAll() {
         <div class="metric-row"><span class="metric-lbl">Ratio pagado : cortesía</span><span class="metric-val">${pagados.length} : ${gratis.length}</span></div>
       </div>
     </div>
-
-    <!-- Tickets table -->
+ 
     <div>
       <div class="section-label">🗂️ Detalle de boletos</div>
       <div class="card" id="tickets-section">
@@ -865,26 +704,23 @@ function renderAll() {
         </div>
       </div>
     </div>`;
-
-  // Animate ratio bar
+ 
   setTimeout(() => {
     const f = document.getElementById('ratio-fill');
     if (f) f.style.width = pct(pagados.length, total) + '%';
   }, 80);
-
-  // Responsive charts row
+ 
   if (window.innerWidth < 540) {
     const cr = document.getElementById('charts-row');
     if (cr) cr.style.gridTemplateColumns = '1fr';
   }
-
+ 
   window._norm = n;
   filtered = [...n];
   applyF();
   buildCharts(pagados.length, gratis.length, areas);
 }
-
-// ── TABLE ──────────────────────────────────────────────────────
+ 
 function applyF() {
   const q  = (document.getElementById('q')?.value||'').toLowerCase();
   const fp = document.getElementById('fp')?.value||'';
@@ -898,7 +734,7 @@ function applyF() {
   page = 1;
   renderTable();
 }
-
+ 
 function renderTable() {
   const tbody = document.getElementById('tbody');
   if (!tbody) return;
@@ -916,29 +752,28 @@ function renderTable() {
       <td><span class="soles-cell ${b.pagado?'p':'g'}">${b.pagado?'S/ 5.00':'—'}</span></td>
     </tr>`).join('') ||
     `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3);font-weight:600">Sin resultados para este filtro</td></tr>`;
-
+ 
   document.getElementById('pag-info').textContent = `${start+1}–${Math.min(start+PER_PAGE,total)} de ${total}`;
   document.getElementById('pPrev').disabled = page <= 1;
   document.getElementById('pNext').disabled = page >= Math.ceil(total/PER_PAGE);
 }
-
+ 
 function goPage(d) {
   page = Math.max(1, Math.min(page+d, Math.ceil(filtered.length/PER_PAGE)));
   renderTable();
   document.getElementById('tickets-section')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
-
+ 
 function srt(col) {
   if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; }
   filtered.sort((a,b) => (a[col]||'').toString().localeCompare((b[col]||'').toString(),'es')*sortDir);
   page=1; renderTable();
 }
-
-// ── CHARTS ────────────────────────────────────────────────────
+ 
 function buildCharts(nP, nG, areas) {
   Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
   Chart.defaults.color = '#7a5c5c';
-
+ 
   if (cPromo) cPromo.destroy();
   cPromo = new Chart(document.getElementById('cPromo'), {
     type: 'doughnut',
@@ -951,7 +786,7 @@ function buildCharts(nP, nG, areas) {
         tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed} (${pct(c.parsed,nP+nG)}%)`}} }
     }
   });
-
+ 
   if (cAreas) cAreas.destroy();
   const top = areas.slice(0,8);
   cAreas = new Chart(document.getElementById('cAreas'), {
@@ -970,8 +805,7 @@ function buildCharts(nP, nG, areas) {
     }
   });
 }
-
-// ── STATUS ────────────────────────────────────────────────────
+ 
 function setStatus(type, msg) {
   const d = document.getElementById('sdot');
   d.className = 'sdot' + (type==='ok'?' ok':type==='error'?' error':type==='load'?' load':'');
