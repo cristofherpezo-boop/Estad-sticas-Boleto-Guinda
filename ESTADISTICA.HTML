@@ -557,8 +557,8 @@ function renderAll() {
   });
   const areas = Object.entries(am)
     .map(([name,d]) => ({ name, tickets:d.t, pagados:d.p, ingresos:d.p*5 }))
-    .sort((a,b) => b.tickets - a.tickets);
-  const maxT = areas[0]?.tickets || 1;
+    .sort((a,b) => b.pagados - a.pagados);
+  const maxT = areas[0]?.pagados || 1;
  
   document.getElementById('main').innerHTML = `
     <div>
@@ -639,30 +639,19 @@ function renderAll() {
     <div>
       <div class="section-label">🏆 Ranking por área</div>
       <div class="card">
-        <div class="card-title">Áreas con más boletos <span>${areas.length} ÁREAS</span></div>
+        <div class="card-title">Áreas con más boletos vendidos <span>${areas.length} ÁREAS</span></div>
         ${areas.map((a,i) => `
           <div class="area-item">
             <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
             <div class="area-info">
               <div class="area-name">${a.name}</div>
               <div class="area-bar-bg">
-                <div class="area-bar-fill" style="width:${pct(a.tickets,maxT)}%"></div>
+                <div class="area-bar-fill" style="width:${pct(a.pagados,maxT)}%"></div>
               </div>
             </div>
-            <div class="area-tickets">${a.tickets} 🎫</div>
+            <div class="area-tickets">${a.pagados} ✅</div>
             <div class="area-soles">S/ ${a.ingresos.toLocaleString('es-PE')}</div>
           </div>`).join('')}
-      </div>
-    </div>
- 
-    <div>
-      <div class="section-label">📈 Métricas clave</div>
-      <div class="card">
-        <div class="metric-row"><span class="metric-lbl">Área líder en ventas</span><span class="metric-val" style="color:var(--gold)">${areas[0]?.name||'—'}</span></div>
-        <div class="metric-row"><span class="metric-lbl">Tickets área líder</span><span class="metric-val">${areas[0]?.tickets||0}</span></div>
-        <div class="metric-row"><span class="metric-lbl">Promedio ingresos por área</span><span class="metric-val">S/ ${areas.length?Math.round(ingresos/areas.length).toLocaleString('es-PE'):0}</span></div>
-        <div class="metric-row"><span class="metric-lbl">Valor real por ticket</span><span class="metric-val">S/ ${total?(ingresos/total).toFixed(2):'0.00'}</span></div>
-        <div class="metric-row"><span class="metric-lbl">Ratio pagado : cortesía</span><span class="metric-val">${pagados.length} : ${gratis.length}</span></div>
       </div>
     </div>
  
