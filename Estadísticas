@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Sentimiento Guinda — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --guinda:    #7a1420;
+    --guinda2:   #5c0f18;
+    --guinda3:   #3d0a10;
+    --crema:     #f5f0e8;
+    --crema2:    #ede6d6;
+    --crema3:    #dfd6c2;
+    --gold:      #b8943a;
+    --gold2:     #d4a843;
+    --text-dark: #2a1a1a;
+    --text-mid:  #6b4a4a;
+    --green:     #3a7d5a;
+    --serif:     'Playfair Display', serif;
+    --body:      'Cormorant Garamond', serif;
+    --mono:      'DM Mono', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--crema); color:var(--text-dark); font-family:var(--body); font-size:16px; min-height:100vh; }
+
+  /* HEADER */
+  header {
+    background:var(--guinda);
+    padding:28px 40px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100;
+    box-shadow:0 4px 24px rgba(90,10,20,0.25);
+  }
+  .header-eyebrow { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.28em; text-transform:uppercase; color:rgba(245,240,232,0.5); margin-bottom:4px; }
+  .header-logo { font-family:var(--serif); font-size:1.9rem; font-weight:600; color:var(--crema); line-height:1; letter-spacing:0.02em; }
+  .header-logo em { font-style:italic; color:var(--gold2); }
+  .header-diamonds { color:var(--gold); font-size:0.7rem; letter-spacing:0.3em; margin-top:4px; }
+
+  .btn-refresh {
+    background:var(--gold); color:var(--guinda3); border:none;
+    font-family:var(--mono); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;
+    padding:12px 28px; cursor:pointer; transition:all 0.25s; font-weight:500;
+    position:relative; overflow:hidden;
+  }
+  .btn-refresh:hover { background:var(--gold2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(184,148,58,0.4); }
+  .btn-refresh:active { transform:translateY(0); }
+  .btn-refresh.loading { pointer-events:none; opacity:0.75; }
+  .btn-refresh.loading::after {
+    content:''; position:absolute; bottom:0; left:0; height:2px; background:var(--guinda);
+    animation:loadbar 1.4s ease-in-out infinite;
+  }
+  @keyframes loadbar { 0%{width:0%;left:0} 50%{width:100%;left:0} 100%{width:0%;left:100%} }
+
+  /* STATUS */
+  #status-bar {
+    background:var(--guinda2); padding:8px 40px;
+    display:flex; align-items:center; gap:20px;
+    font-family:var(--mono); font-size:0.6rem; letter-spacing:0.12em; color:rgba(245,240,232,0.5);
+  }
+  .dot { width:6px; height:6px; border-radius:50%; background:rgba(245,240,232,0.2); display:inline-block; margin-right:6px; transition:all 0.3s; }
+  .dot.ok    { background:#5fba8a; box-shadow:0 0 6px #5fba8a; }
+  .dot.error { background:#f08080; box-shadow:0 0 6px #f08080; }
+
+  /* MAIN */
+  main { padding:36px 40px 60px; max-width:1280px; margin:0 auto; display:grid; gap:28px; }
+
+  .section-title {
+    font-family:var(--serif); font-size:0.78rem; font-weight:400; letter-spacing:0.2em;
+    text-transform:uppercase; color:var(--guinda);
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--crema3); }
+
+  /* KPI */
+  .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi-card {
+    background:white; border:1px solid var(--crema3); padding:24px 22px;
+    position:relative; overflow:hidden; transition:box-shadow 0.2s, transform 0.2s;
+  }
+  .kpi-card:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(122,20,32,0.1); }
+  .kpi-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; }
+  .kpi-card.c-guinda::after { background:var(--guinda); }
+  .kpi-card.c-gold::after   { background:var(--gold); }
+  .kpi-card.c-green::after  { background:var(--green); }
+  .kpi-card.c-mid::after    { background:var(--crema3); }
+  .kpi-diamond { color:var(--gold); font-size:0.7rem; margin-bottom:8px; letter-spacing:0.2em; }
+  .kpi-label { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-mid); margin-bottom:10px; }
+  .kpi-value { font-family:var(--serif); font-size:3rem; font-weight:700; line-height:1; color:var(--text-dark); }
+  .kpi-value.guinda { color:var(--guinda); }
+  .kpi-value.gold   { color:var(--gold); }
+  .kpi-value.green  { color:var(--green); }
+  .kpi-sub { font-family:var(--body); font-size:0.78rem; color:var(--text-mid); margin-top:6px; font-style:italic; }
+
+  /* CHARTS */
+  .charts-row { display:grid; grid-template-columns:380px 1fr; gap:16px; }
+  .card { background:white; border:1px solid var(--crema3); padding:28px; }
+  .chart-wrap { position:relative; height:260px; }
+
+  /* AREAS TABLE */
+  .area-table { width:100%; border-collapse:collapse; }
+  .area-table thead tr { border-bottom:2px solid var(--crema3); }
+  .area-table th { font-family:var(--mono); font-size:0.55rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-mid); padding:8px 12px; text-align:right; font-weight:400; }
+  .area-table th:first-child { text-align:left; }
+  .area-table tbody tr { border-bottom:1px solid var(--crema2); transition:background 0.15s; }
+  .area-table tbody tr:hover { background:var(--crema2); }
+  .area-table td { padding:12px; font-size:0.88rem; text-align:right; color:var(--text-dark); }
+  .area-table td:first-child { text-align:left; }
+  .rank-num { font-family:var(--serif); font-size:1.4rem; font-weight:700; color:var(--crema3); line-height:1; width:32px; display:inline-block; }
+  .rank-num.r1 { color:var(--gold); }
+  .rank-num.r2 { color:var(--text-mid); }
+  .rank-num.r3 { color:#b08060; }
+  .mini-bar-bg { height:4px; background:var(--crema2); border-radius:2px; overflow:hidden; }
+  .mini-bar { height:100%; background:var(--guinda); border-radius:2px; transition:width 0.9s cubic-bezier(0.16,1,0.3,1); }
+  .gold-text { color:var(--gold); font-weight:500; }
+  .guinda-text { color:var(--guinda); font-weight:500; }
+
+  /* TICKETS TABLE */
+  .tickets-card { background:white; border:1px solid var(--crema3); padding:28px; }
+  .ticket-controls { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+  .search-input { flex:1; min-width:180px; border:1px solid var(--crema3); background:var(--crema); font-family:var(--body); font-size:0.88rem; padding:8px 14px; color:var(--text-dark); outline:none; transition:border-color 0.2s; font-style:italic; }
+  .search-input:focus { border-color:var(--guinda); }
+  .search-input::placeholder { color:var(--text-mid); }
+  .filter-select { border:1px solid var(--crema3); background:var(--crema); font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; padding:8px 14px; color:var(--text-dark); outline:none; cursor:pointer; }
+  .tickets-table { width:100%; border-collapse:collapse; }
+  .tickets-table thead tr { background:var(--guinda); color:var(--crema); }
+  .tickets-table th { font-family:var(--mono); font-size:0.55rem; letter-spacing:0.14em; text-transform:uppercase; padding:10px 14px; text-align:left; font-weight:400; cursor:pointer; user-select:none; white-space:nowrap; }
+  .tickets-table th:hover { background:var(--guinda2); }
+  .tickets-table tbody tr { border-bottom:1px solid var(--crema2); transition:background 0.15s; }
+  .tickets-table tbody tr:hover { background:var(--crema2); }
+  .tickets-table td { padding:10px 14px; font-size:0.82rem; color:var(--text-dark); white-space:nowrap; }
+  .badge { display:inline-block; padding:2px 10px; font-family:var(--mono); font-size:0.58rem; letter-spacing:0.1em; border-radius:2px; }
+  .badge.pagado { background:rgba(58,125,90,0.12); color:var(--green); border:1px solid rgba(58,125,90,0.3); }
+  .badge.gratis  { background:rgba(107,74,74,0.08); color:var(--text-mid); border:1px solid var(--crema3); }
+  .ticket-id { font-family:var(--serif); font-size:1.1rem; font-weight:700; color:var(--guinda); }
+  .pagination { display:flex; align-items:center; justify-content:space-between; margin-top:16px; font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; color:var(--text-mid); }
+  .page-btn { background:white; border:1px solid var(--crema3); color:var(--text-dark); padding:6px 14px; font-family:var(--mono); font-size:0.6rem; cursor:pointer; transition:all 0.15s; }
+  .page-btn:hover:not(:disabled) { background:var(--guinda); color:var(--crema); border-color:var(--guinda); }
+  .page-btn:disabled { opacity:0.35; cursor:default; }
+
+  /* METRICS */
+  .metrics-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .metric-line { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid var(--crema2); }
+  .metric-line:last-child { border-bottom:none; }
+  .metric-label { font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-mid); }
+  .metric-val { font-family:var(--serif); font-size:1.1rem; font-weight:600; color:var(--text-dark); }
+  .promo-bar-wrap { height:8px; background:var(--crema2); border-radius:4px; overflow:hidden; margin:18px 0 8px; }
+  .promo-bar-fill { height:100%; background:linear-gradient(90deg,var(--guinda),var(--gold)); border-radius:4px; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+  /* EMPTY */
+  .empty-state { padding:80px 40px; text-align:center; color:var(--text-mid); font-family:var(--body); }
+  .empty-icon { font-family:var(--serif); font-size:4rem; font-style:italic; font-weight:700; color:var(--crema3); display:block; margin-bottom:16px; }
+
+  /* FOOTER */
+  footer { background:var(--guinda3); color:rgba(245,240,232,0.4); text-align:center; padding:20px; font-family:var(--mono); font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; }
+  footer strong { color:var(--gold); }
+
+  /* RESPONSIVE */
+  @media(max-width:960px) {
+    header { padding:20px; }
+    main { padding:24px 20px 48px; }
+    #status-bar { padding:8px 20px; }
+    .kpi-row { grid-template-columns:1fr 1fr; }
+    .charts-row { grid-template-columns:1fr; }
+    .metrics-row { grid-template-columns:1fr; }
+  }
+  @media(max-width:540px) {
+    .header-logo { font-size:1.3rem; }
+    .kpi-value { font-size:2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-eyebrow">El Sentimiento Guinda</div>
+    <div class="header-logo"><em>Boleto</em> Guinda — Dashboard</div>
+    <div class="header-diamonds">✦ &nbsp; ✦ &nbsp; ✦</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+    <button class="btn-refresh" id="btn-refresh" onclick="fetchData()">✦ &nbsp;Actualizar</button>
+    <div id="last-update" style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:rgba(245,240,232,0.4)">— sin datos —</div>
+  </div>
+</header>
+
+<div id="status-bar">
+  <span><span class="dot" id="status-dot"></span><span id="status-text">Presiona Actualizar para cargar datos</span></span>
+  <span id="status-count"></span>
+</div>
+
+<main id="main-content">
+  <div class="empty-state">
+    <span class="empty-icon">BG</span>
+    <p>Presiona <strong style="color:var(--guinda)">✦ Actualizar</strong> para consultar<br>los tickets desde SharePoint.</p>
+  </div>
+</main>
+
+<footer><strong>El Sentimiento Guinda</strong> &nbsp;·&nbsp; Pasión · Tradición · Emoción</footer>
+
+<script>
+const ENDPOINT = 'https://defaultef18f8a5d24a41338b5529106fa5b7.72.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d500598a21f04a91adf9ff407c79fe21/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J8qStV9Xflurg1-2UMl8x86RwGZ6-d6WBtq2hY6xqLc';
+
+let allBoletos = [], filteredBoletos = [], currentPage = 1;
+const PAGE_SIZE = 15;
+let sortCol = null, sortDir = 1;
+let chartPromo = null, chartAreas = null;
+
+async function fetchData() {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('loading'); btn.textContent = '↻  Cargando...';
+  setStatus('', 'Consultando SharePoint...');
+  try {
+    const res = await fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    allBoletos = Array.isArray(data) ? data : (data.boletos || data.value || []);
+    filteredBoletos = [...allBoletos];
+    currentPage = 1;
+    renderAll();
+    setStatus('ok', allBoletos.length + ' tickets cargados');
+    document.getElementById('last-update').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-PE');
+  } catch(err) {
+    setStatus('error', 'Error: ' + err.message);
+    document.getElementById('main-content').innerHTML =
+      '<div class="empty-state"><span class="empty-icon">!</span><p>No se pudo conectar al endpoint.<br><small>' + err.message + '</small></p></div>';
+  } finally {
+    btn.classList.remove('loading'); btn.textContent = '✦  Actualizar';
+  }
+}
+
+function getF(b) {
+  // Returns a normalized object from any field naming convention
+  return {
+    id:     b.ID_Ticket || b.Id_Ticket || b.id_ticket || b.PedidoID || b.Title || '',
+    nombre: b['Nombre completo'] || b.NombreCompleto || b.nombre || b.Nombre || '',
+    dni:    b.DNI || b.dni || b.Dni || '',
+    tel:    b.Teléfono || b.Telefono || b.telefono || b.teléfono || '',
+    area:   (b.Area || b.Área || b.area || 'Sin área').toString().trim().toUpperCase(),
+    promo:  normalizePromo(b.Promocion || b.Promoción || b.promocion || b.promoción),
+  };
+}
+
+function normalizePromo(v) {
+  if (!v) return 'No';
+  const s = v.toString().trim().toLowerCase();
+  return (s==='sí'||s==='si'||s==='yes'||s==='1'||s==='true') ? 'Sí' : 'No';
+}
+
+function pct(a,t) { return t ? Math.round(a/t*100) : 0; }
+
+function renderAll() {
+  const total   = allBoletos.length;
+  if (!total) {
+    document.getElementById('main-content').innerHTML =
+      '<div class="empty-state"><span class="empty-icon">0</span><p>No hay tickets en la lista.</p></div>';
+    return;
+  }
+  const normalized = allBoletos.map(getF);
+  const pagados = normalized.filter(b => b.promo === 'No');
+  const gratis  = normalized.filter(b => b.promo === 'Sí');
+  const ingresos = pagados.length * 5;
+
+  const areaMap = {};
+  normalized.forEach(b => {
+    if (!areaMap[b.area]) areaMap[b.area] = { tickets:0, pagados:0 };
+    areaMap[b.area].tickets++;
+    if (b.promo === 'No') areaMap[b.area].pagados++;
+  });
+  const areas = Object.entries(areaMap)
+    .map(([name,d]) => ({ name, tickets:d.tickets, pagados:d.pagados, ingresos:d.pagados*5 }))
+    .sort((a,b) => b.tickets - a.tickets);
+  const maxT = areas[0]?.tickets || 1;
+
+  document.getElementById('main-content').innerHTML = `
+    <div>
+      <div class="section-title">✦ &nbsp; Resumen General</div>
+      <div class="kpi-row">
+        <div class="kpi-card c-guinda">
+          <div class="kpi-diamond">✦</div>
+          <div class="kpi-label">Total Tickets</div>
+          <div class="kpi-value guinda">${total.toLocaleString('es-PE')}</div>
+          <div class="kpi-sub">registros en lista</div>
+        </div>
+        <div class="kpi-card c-green">
+          <div class="kpi-diamond">✦</div>
+          <div class="kpi-label">Tickets Pagados</div>
+          <div class="kpi-value green">${pagados.length.toLocaleString('es-PE')}</div>
+          <div class="kpi-sub">Promoción = No</div>
+        </div>
+        <div class="kpi-card c-gold">
+          <div class="kpi-diamond">✦</div>
+          <div class="kpi-label">Ingresos Totales</div>
+          <div class="kpi-value gold">S/${ingresos.toLocaleString('es-PE')}</div>
+          <div class="kpi-sub">a S/5.00 por ticket pagado</div>
+        </div>
+        <div class="kpi-card c-mid">
+          <div class="kpi-diamond" style="color:var(--crema3)">✦</div>
+          <div class="kpi-label">Tickets Cortesía</div>
+          <div class="kpi-value">${gratis.length.toLocaleString('es-PE')}</div>
+          <div class="kpi-sub">${pct(gratis.length,total)}% — Promoción = Sí</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">✦ &nbsp; Distribución</div>
+      <div class="charts-row">
+        <div class="card">
+          <div class="section-title" style="font-size:0.6rem;margin-bottom:12px">Pagados vs Cortesía</div>
+          <div class="chart-wrap"><canvas id="chart-promo"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="font-size:0.6rem;margin-bottom:12px">Ingresos por Área (S/)</div>
+          <div class="chart-wrap"><canvas id="chart-areas"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">✦ &nbsp; Ranking por Área</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="area-table">
+          <thead><tr>
+            <th>#&nbsp; Área</th><th>Progreso</th><th>Tickets</th><th>Pagados</th><th>S/ Ingresos</th>
+          </tr></thead>
+          <tbody>
+            ${areas.map((a,i) => `
+              <tr>
+                <td><span class="rank-num ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span>&nbsp;<em>${a.name}</em></td>
+                <td style="width:90px"><div class="mini-bar-bg"><div class="mini-bar" style="width:${pct(a.tickets,maxT)}%"></div></div></td>
+                <td class="guinda-text">${a.tickets}</td>
+                <td>${a.pagados}</td>
+                <td class="gold-text">S/ ${a.ingresos.toLocaleString('es-PE')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tickets-card" id="tickets-section">
+      <div class="section-title">✦ &nbsp; Detalle de Tickets</div>
+      <div class="ticket-controls">
+        <input class="search-input" id="search-input" placeholder="Buscar por nombre, DNI, N° ticket, área…" oninput="applyFilters()">
+        <select class="filter-select" id="filter-promo" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="No">Pagados</option>
+          <option value="Sí">Cortesía</option>
+        </select>
+        <select class="filter-select" id="filter-area" onchange="applyFilters()">
+          <option value="">Todas las áreas</option>
+          ${areas.map(a => `<option value="${a.name}">${a.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tickets-table">
+          <thead><tr>
+            <th onclick="sortBy('id')">N° Ticket ↕</th>
+            <th onclick="sortBy('nombre')">Nombre ↕</th>
+            <th>DNI</th>
+            <th>Teléfono</th>
+            <th onclick="sortBy('area')">Área ↕</th>
+            <th onclick="sortBy('promo')">Promoción ↕</th>
+            <th>S/ Pago</th>
+          </tr></thead>
+          <tbody id="tickets-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="page-info"></span>
+        <div style="display:flex;gap:8px">
+          <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Anterior</button>
+          <button class="page-btn" id="btn-next" onclick="changePage(1)">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">✦ &nbsp; Métricas Clave</div>
+      <div class="metrics-row">
+        <div class="card">
+          <div class="metric-line"><span class="metric-label">Área líder en ventas</span><span class="metric-val" style="color:var(--gold);font-style:italic">${areas[0]?.name||'—'}</span></div>
+          <div class="metric-line"><span class="metric-label">Tickets del área líder</span><span class="metric-val">${areas[0]?.tickets||0}</span></div>
+          <div class="metric-line"><span class="metric-label">Promedio ingresos por área</span><span class="metric-val">S/ ${areas.length?Math.round(ingresos/areas.length).toLocaleString('es-PE'):0}</span></div>
+          <div class="metric-line"><span class="metric-label">Valor real por ticket</span><span class="metric-val">S/ ${total?(ingresos/total).toFixed(2):'0.00'}</span></div>
+          <div class="metric-line"><span class="metric-label">Ratio pagado : cortesía</span><span class="metric-val">${pagados.length} : ${gratis.length}</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="font-size:0.6rem;margin-bottom:4px">Balance Pagados vs Cortesía</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0">
+            <div style="text-align:center;padding:16px;background:rgba(58,125,90,0.06);border:1px solid rgba(58,125,90,0.2)">
+              <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;color:var(--text-mid);margin-bottom:6px">PAGADOS</div>
+              <div style="font-family:var(--serif);font-size:2.4rem;font-weight:700;color:var(--green)">${pagados.length}</div>
+              <div style="font-size:0.8rem;color:var(--text-mid);font-style:italic">S/ ${ingresos.toLocaleString('es-PE')}</div>
+            </div>
+            <div style="text-align:center;padding:16px;background:var(--crema);border:1px solid var(--crema3)">
+              <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;color:var(--text-mid);margin-bottom:6px">CORTESÍA</div>
+              <div style="font-family:var(--serif);font-size:2.4rem;font-weight:700;color:var(--text-mid)">${gratis.length}</div>
+              <div style="font-size:0.8rem;color:var(--text-mid);font-style:italic">S/ 0</div>
+            </div>
+          </div>
+          <div class="promo-bar-wrap"><div class="promo-bar-fill" id="promo-fill" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;color:var(--text-mid)">
+            <span>${pct(pagados.length,total)}% pagados</span>
+            <span>${pct(gratis.length,total)}% cortesía</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  setTimeout(() => { const f=document.getElementById('promo-fill'); if(f) f.style.width=pct(pagados.length,total)+'%'; }, 100);
+
+  // Store normalized for table
+  window._normalized = normalized;
+  filteredBoletos = [...normalized];
+  applyFilters();
+  buildCharts(pagados.length, gratis.length, areas);
+}
+
+function applyFilters() {
+  const q     = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const promo = document.getElementById('filter-promo')?.value||'';
+  const area  = document.getElementById('filter-area')?.value||'';
+  const src   = window._normalized || [];
+
+  filteredBoletos = src.filter(b => {
+    const matchQ = !q || b.nombre.toLowerCase().includes(q) || b.dni.includes(q) || b.id.toString().includes(q) || b.area.toLowerCase().includes(q);
+    const matchP = !promo || b.promo === promo;
+    const matchA = !area || b.area === area;
+    return matchQ && matchP && matchA;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tickets-tbody');
+  if (!tbody) return;
+  const start = (currentPage-1)*PAGE_SIZE;
+  const slice = filteredBoletos.slice(start, start+PAGE_SIZE);
+  const total = filteredBoletos.length;
+  const pages = Math.ceil(total/PAGE_SIZE);
+
+  tbody.innerHTML = slice.map(b => {
+    const pagado = b.promo === 'No';
+    return `<tr>
+      <td><span class="ticket-id">${b.id||'—'}</span></td>
+      <td style="font-style:italic">${b.nombre||'—'}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem">${b.dni||'—'}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem">${b.tel||'—'}</td>
+      <td><span style="font-family:var(--mono);font-size:0.7rem">${b.area}</span></td>
+      <td><span class="badge ${pagado?'pagado':'gratis'}">${pagado?'PAGADO':'CORTESÍA'}</span></td>
+      <td style="font-family:var(--serif);font-size:1rem;font-weight:600;color:${pagado?'var(--green)':'var(--text-mid)'}">${pagado?'S/ 5.00':'—'}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-mid);font-style:italic">Sin resultados</td></tr>`;
+
+  document.getElementById('page-info').textContent = `${start+1}–${Math.min(start+PAGE_SIZE,total)} de ${total}`;
+  document.getElementById('btn-prev').disabled = currentPage<=1;
+  document.getElementById('btn-next').disabled = currentPage>=pages;
+}
+
+function changePage(dir) {
+  currentPage = Math.max(1, Math.min(currentPage+dir, Math.ceil(filteredBoletos.length/PAGE_SIZE)));
+  renderTable();
+  document.getElementById('tickets-section')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function sortBy(col) {
+  if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; }
+  filteredBoletos.sort((a,b) => (a[col]||'').toString().localeCompare((b[col]||'').toString(),'es')*sortDir);
+  currentPage=1; renderTable();
+}
+
+function buildCharts(nP, nG, areas) {
+  Chart.defaults.font.family = "'DM Mono', monospace";
+  Chart.defaults.color = '#6b4a4a';
+  if(chartPromo) chartPromo.destroy();
+  chartPromo = new Chart(document.getElementById('chart-promo'), {
+    type:'doughnut',
+    data:{ labels:['Pagados (S/5)','Cortesía'],
+      datasets:[{ data:[nP,nG], backgroundColor:['#3a7d5a','#dfd6c2'], borderColor:['#fff','#fff'], borderWidth:3, hoverOffset:10 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{ labels:{ font:{size:11}, padding:20 } },
+        tooltip:{ callbacks:{ label:c=>` ${c.label}: ${c.parsed} (${pct(c.parsed,nP+nG)}%)` } } }
+    }
+  });
+  if(chartAreas) chartAreas.destroy();
+  const top = areas.slice(0,8);
+  chartAreas = new Chart(document.getElementById('chart-areas'), {
+    type:'bar',
+    data:{ labels:top.map(a=>a.name.length>13?a.name.slice(0,13)+'…':a.name),
+      datasets:[{ label:'S/ Ingresos', data:top.map(a=>a.ingresos),
+        backgroundColor:top.map((_,i)=>i===0?'#b8943a':'#7a1420'), borderRadius:3 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>` S/ ${c.parsed.y.toLocaleString('es-PE')}`}} },
+      scales:{ x:{ticks:{font:{size:9}},grid:{color:'#f0ece8'}}, y:{ticks:{font:{size:9},callback:v=>'S/'+v},grid:{color:'#f0ece8'}} }
+    }
+  });
+}
+
+function setStatus(type, msg) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'dot'+(type==='ok'?' ok':type==='error'?' error':'');
+  document.getElementById('status-text').textContent = msg;
+  document.getElementById('status-count').textContent = '';
+}
+</script>
+</body>
+</html>
