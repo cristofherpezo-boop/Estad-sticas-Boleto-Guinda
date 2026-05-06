@@ -637,21 +637,63 @@ function renderAll() {
     </div>
  
     <div>
-      <div class="section-label">🏆 Ranking por área</div>
-      <div class="card">
-        <div class="card-title">Áreas con más boletos vendidos <span>${areas.length} ÁREAS</span></div>
-        ${areas.map((a,i) => `
-          <div class="area-item">
-            <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
-            <div class="area-info">
-              <div class="area-name">${a.name}</div>
-              <div class="area-bar-bg">
-                <div class="area-bar-fill" style="width:${pct(a.pagados,maxT)}%"></div>
+      <div class="section-label">🏆 Rankings por área</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+ 
+        <!-- RANKING 1: Total boletos -->
+        <div class="card">
+          <div class="card-title">🎫 Total de boletos por área <span>TODOS</span></div>
+          ${[...areas].sort((a,b)=>b.tickets-a.tickets).map((a,i,arr)=>`
+            <div class="area-item">
+              <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+              <div class="area-info">
+                <div class="area-name">${a.name}</div>
+                <div class="area-bar-bg">
+                  <div class="area-bar-fill" style="width:${pct(a.tickets,arr[0].tickets)}%"></div>
+                </div>
               </div>
-            </div>
-            <div class="area-tickets">${a.pagados} ✅</div>
-            <div class="area-soles">S/ ${a.ingresos.toLocaleString('es-PE')}</div>
-          </div>`).join('')}
+              <div class="area-tickets">${a.tickets} 🎫</div>
+              <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${pct(a.tickets,total)}%</div>
+            </div>`).join('')}
+        </div>
+ 
+        <!-- RANKING 2: Boletos pagados + monto -->
+        <div class="card">
+          <div class="card-title">✅ Boletos pagados por área <span>S/ INGRESOS</span></div>
+          ${[...areas].sort((a,b)=>b.pagados-a.pagados).map((a,i,arr)=>`
+            <div class="area-item">
+              <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+              <div class="area-info">
+                <div class="area-name">${a.name}</div>
+                <div class="area-bar-bg">
+                  <div class="area-bar-fill" style="width:${pct(a.pagados,arr[0].pagados||1)}%;background:var(--green)"></div>
+                </div>
+              </div>
+              <div class="area-tickets" style="color:var(--green)">${a.pagados} ✅</div>
+              <div class="area-soles">S/ ${a.ingresos.toLocaleString('es-PE')}</div>
+            </div>`).join('')}
+        </div>
+ 
+        <!-- RANKING 3: Boletos cortesía -->
+        <div class="card">
+          <div class="card-title">🎁 Boletos cortesía por área <span>PROMOCIÓN</span></div>
+          ${[...areas].sort((a,b)=>(b.tickets-b.pagados)-(a.tickets-a.pagados)).map((a,i,arr)=>{
+            const cortesia = a.tickets - a.pagados;
+            const maxC = arr[0].tickets - arr[0].pagados || 1;
+            return `
+            <div class="area-item">
+              <div class="area-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+              <div class="area-info">
+                <div class="area-name">${a.name}</div>
+                <div class="area-bar-bg">
+                  <div class="area-bar-fill" style="width:${pct(cortesia,maxC)}%;background:var(--text3)"></div>
+                </div>
+              </div>
+              <div class="area-tickets" style="color:var(--text3)">${cortesia} 🎁</div>
+              <div class="area-soles" style="color:var(--text3);font-size:0.7rem">${pct(cortesia,a.tickets)}% del área</div>
+            </div>`;}).join('')}
+        </div>
+ 
       </div>
     </div>
  
